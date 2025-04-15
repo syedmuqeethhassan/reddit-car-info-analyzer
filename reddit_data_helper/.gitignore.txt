@@ -1,0 +1,44 @@
+#--------------------------------------
+# Node & React (JavaScript) Ignores
+#--------------------------------------
+# Ignore node_modules in any subfolder
+**/node_modules/
+
+# Ignore build artifacts (React, etc.)
+**/build/
+**/dist/
+
+# Optional: lock files (if you don’t want them tracked)
+# package-lock.json
+# yarn.lock
+
+#--------------------------------------
+# Python Ignores
+#--------------------------------------
+# Byte-compiled / optimized / DLL files
+**/__pycache__/
+**/*.py[cod]
+
+# Virtual environments
+**/venv/
+**/.venv/
+
+#--------------------------------------
+# Environment Variables
+#--------------------------------------
+**/.env
+**/.env.*
+
+#--------------------------------------
+# OS/Editor/IDE cruft
+#--------------------------------------
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+#--------------------------------------
+# Logs
+#--------------------------------------
+*.log
+**/*.log

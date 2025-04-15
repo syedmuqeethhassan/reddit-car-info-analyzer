@@ -1,0 +1,7 @@
+flask
+flask-cors
+langchain
+google-generativeai
+langchain-google-genai
+python-dotenv
+requests
