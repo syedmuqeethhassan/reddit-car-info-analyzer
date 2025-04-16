@@ -10,4 +10,4 @@ root.render(
   </React.StrictMode>
 );
 
-// App.css - Basic styling for the application
+

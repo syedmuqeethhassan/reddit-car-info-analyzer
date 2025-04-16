@@ -186,7 +186,6 @@ app.listen(PORT, () => {
     console.log(`API endpoint available at http://localhost:${PORT}/api/search`);
 });
 
-// For backwards compatibility, you can still run a direct search
 // if no command line args, it starts the server
 // if argument provided, it runs the search with that keyword
 if (process.argv.length > 2) {

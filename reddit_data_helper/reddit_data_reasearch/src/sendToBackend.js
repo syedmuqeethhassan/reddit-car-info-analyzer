@@ -78,23 +78,3 @@ export async function sendFile() {
     }
 }
 
-/**
- * Example of how to use the sendFile function in a React component
- * 
- * import { sendFile } from './sendToBackend';
- * 
- * // In your React component:
- * const handleSendToBackend = async () => {
- *   try {
- *     await sendFile((summaryData) => {
- *       // Update your React state with the summary data
- *       setSummary(summaryData.summary);
- *       setSourceFile(summaryData.source_file);
- *       // Any other state updates or UI actions
- *     });
- *   } catch (error) {
- *     console.error("Failed to process file:", error);
- *     // Handle error in UI
- *   }
- * };
- */
