@@ -40,7 +40,7 @@ def summarize_text(text_content):
         doc = Document(page_content=text_content)
         
         # Initialize the LLM
-        llm = GoogleGenerativeAI(model="gemini-2.5-pro-exp-03-25")
+        llm = GoogleGenerativeAI(model="gemini-2.0-flash-lite")
         
         # Load the summarization chain
         chain = load_summarize_chain(llm, chain_type="stuff")

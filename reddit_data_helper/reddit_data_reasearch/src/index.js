@@ -33,101 +33,129 @@ async function saveDataToFile(data, filename) {
     }
 }
 
-// Main function to fetch posts and their comments
-async function performSearch(keyword, subreddit = "whatcarshouldibuy", limit = 4, sort = "relevance") {
-    const outputFilename = `result.json`;
-    
+// Function to validate and fetch posts
+async function fetchAndValidatePosts(keyword, subreddit, limit, sort) {
     console.log(`Searching r/${subreddit} for "${keyword}"...`);
-
+    
     const posts = await searchSubreddit(keyword, subreddit, limit, sort);
-
+    
     if (posts.length === 0) {
         console.log(`No posts found in r/${subreddit} matching "${keyword}".`);
-        return {
-            keyword,
-            subreddit,
-            fetchDate: new Date().toISOString(),
-            posts: []
-        };
+        return [];
     }
-
-    console.log(`\nFound ${posts.length} posts in r/${subreddit} matching "${keyword}"\n`);
     
-    // Create a data structure to hold all posts and comments
-    const allData = {
+    console.log(`\nFound ${posts.length} posts in r/${subreddit} matching "${keyword}"\n`);
+    return posts;
+}
+
+// Function to create initial data structure
+function createDataStructure(keyword, subreddit) {
+    return {
         keyword,
         subreddit,
         fetchDate: new Date().toISOString(),
         posts: []
     };
+}
+
+// Function to display post information
+function displayPostInfo(post, index) {
+    console.log(`\nPOST ${index + 1}: ${post.title}`);
+    console.log(`URL: ${post.url}`);
+    console.log(`Author: ${post.author} | Score: ${post.score} | Comments: ${post.num_comments}`);
+    console.log(`Posted: ${new Date(post.created).toLocaleString()}`);
     
-    // Process each post
-    for (let i = 0; i < posts.length; i++) {
-        const post = posts[i];
-        const postData = { ...post };
+    // Show truncated post content if available
+    if (post.selftext && post.selftext !== "[No content]") {
+        const preview = post.selftext.length > 150 
+            ? post.selftext.substring(0, 150) + "..." 
+            : post.selftext;
+        console.log(`Content: ${preview}`);
+    }
+}
 
-        console.log(`\nPOST ${i + 1}: ${post.title}`);
-        console.log(`URL: ${post.url}`);
-        console.log(`Author: ${post.author} | Score: ${post.score} | Comments: ${post.num_comments}`);
-        console.log(`Posted: ${new Date(post.created).toLocaleString()}`);
+// Function to display comment information
+function displayCommentInfo(comment, index) {
+    console.log("\n" + "-".repeat(40)); // Separator for readability
+    
+    // Display comment 
+    console.log(`COMMENT ${index + 1}:`);
+    console.log(`Author: ${comment.author} | Score: ${comment.score}`);
+    console.log(`${comment.text}`);
+    
+    if (comment.replies.length > 0) {
+        console.log(`\nReplies (${comment.replies.length}):`);
         
-        // Show truncated post content if available
-        if (post.selftext && post.selftext !== "[No content]") {
-            const preview = post.selftext.length > 150 
-                ? post.selftext.substring(0, 150) + "..." 
-                : post.selftext;
-            console.log(`Content: ${preview}`);
-        }
-
-        if (!post.id) {
-            console.error(`❌ Skipping post ${i + 1} - ID is undefined`);
-            continue;
-        }
-
-        // Fetch comments with improved function
-        console.log(`Fetching comments...`);
-        const comments = await fetchPostComments(post.id, 15, 3);
+        // Show top 2 replies
+        comment.replies.slice(0, 2).forEach((reply, replyIdx) => {
+            console.log(`\n  Reply ${replyIdx + 1}:`);
+            console.log(`  Author: ${reply.author} | Score: ${reply.score}`);
+            console.log(`  ${reply.text}`);
+        });
         
-        console.log(`Fetched ${comments.length} comments with nested replies`);
-        
-        // Add comments to the post data
-        postData.comments = comments;
-        allData.posts.push(postData);
-
-        // Display sample comments with improved formatting
-        if (comments.length > 0) {
-            console.log("\nTOP COMMENTS:");
-            comments.slice(0, 5).forEach((comment, idx) => {
-                console.log("\n" + "-".repeat(40)); // Separator for readability
-                
-                // Display comment with proper formatting
-                console.log(`COMMENT ${idx + 1}:`);
-                console.log(`Author: ${comment.author} | Score: ${comment.score}`);
-                console.log(`${comment.text}`);
-                
-                if (comment.replies.length > 0) {
-                    console.log(`\nReplies (${comment.replies.length}):`);
-                    
-                    // Show top 2 replies if available
-                    comment.replies.slice(0, 2).forEach((reply, replyIdx) => {
-                        console.log(`\n  Reply ${replyIdx + 1}:`);
-                        console.log(`  Author: ${reply.author} | Score: ${reply.score}`);
-                        console.log(`  ${reply.text}`);
-                    });
-                    
-                    // Indicate if there are more replies
-                    if (comment.replies.length > 2) {
-                        console.log(`\n  ... and ${comment.replies.length - 2} more replies`);
-                    }
-                } else {
-                    console.log("\nNo replies to this comment");
-                }
-            });
+        // Indicate if there are more replies
+        if (comment.replies.length > 2) {
+            console.log(`\n  ... and ${comment.replies.length - 2} more replies`);
         }
+    } else {
+        console.log("\nNo replies to this comment");
+    }
+}
 
-        console.log("\n" + "=".repeat(60)); // Post separator
+// Function to display comments section
+function displayCommentsSection(comments) {
+    if (comments.length > 0) {
+        console.log("\nTOP COMMENTS:");
+        comments.slice(0, 5).forEach((comment, idx) => {
+            displayCommentInfo(comment, idx);
+        });
+    }
+}
+
+// Function to process a single post
+async function processPost(post, index) {
+    const postData = { ...post };
+    
+    displayPostInfo(post, index);
+    
+    if (!post.id) {
+        console.error(`❌ Skipping post ${index + 1} - ID is undefined`);
+        return null;
     }
     
+    // Fetch comments
+    console.log(`Fetching comments...`);
+    const comments = await fetchPostComments(post.id, 15, 3);
+    
+    console.log(`Fetched ${comments.length} comments with nested replies`);
+    
+    // Add comments to the post data
+    postData.comments = comments;
+    
+    // Display sample comments
+    displayCommentsSection(comments);
+    
+    console.log("\n" + "=".repeat(60)); // Post separator
+    
+    return postData;
+}
+
+// Function to process all posts
+async function processAllPosts(posts) {
+    const processedPosts = [];
+    
+    for (let i = 0; i < posts.length; i++) {
+        const postData = await processPost(posts[i], i);
+        if (postData) {
+            processedPosts.push(postData);
+        }
+    }
+    
+    return processedPosts;
+}
+
+// Function to generate summary and save data
+async function generateSummaryAndSave(allData, outputFilename) {
     // Save all data to a file
     await saveDataToFile(allData, outputFilename);
     
@@ -141,6 +169,33 @@ async function performSearch(keyword, subreddit = "whatcarshouldibuy", limit = 4
         console.error("❌ Failed to generate summary:", error.message);
         return allData; // Fallback to returning original data
     }
+}
+
+// Main function to fetch posts and their comments
+async function performSearch(keyword, subreddit = "whatcarshouldibuy", limit = 4, sort = "relevance") {
+    const outputFilename = `result.json`;
+    
+    // Fetch and validate posts
+    const posts = await fetchAndValidatePosts(keyword, subreddit, limit, sort);
+    
+    if (posts.length === 0) {
+        return {
+            keyword,
+            subreddit,
+            fetchDate: new Date().toISOString(),
+            posts: []
+        };
+    }
+    
+    // Create data structure
+    const allData = createDataStructure(keyword, subreddit);
+    
+    // Process all posts
+    const processedPosts = await processAllPosts(posts);
+    allData.posts = processedPosts;
+    
+    // Generate summary and save data
+    return await generateSummaryAndSave(allData, outputFilename);
 }
 
 // API endpoint to handle searches
