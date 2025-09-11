@@ -1,0 +1,23 @@
+{
+  "version": 2,
+  "functions": {
+    "api/summarize.py": {
+      "runtime": "python3.11",
+      "maxDuration": 30,
+      "includeFiles": [
+        "api/summarize.py"
+      ]
+    },
+    "api/search.js": {
+      "runtime": "nodejs20.x",
+      "maxDuration": 30
+    }
+  },
+  "buildCommand": "cd reddit_data_helper/reddit_search_frontend && npm ci && npm run build",
+  "outputDirectory": "reddit_data_helper/reddit_search_frontend/build",
+  "env": {
+    "NODE_OPTIONS": "--max_old_space_size=1536"
+  }
+}
+
+

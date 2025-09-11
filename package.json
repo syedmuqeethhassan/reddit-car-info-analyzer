@@ -1,0 +1,13 @@
+{
+  "name": "reddit-car-info-analyzer",
+  "private": true,
+  "scripts": {
+    "vercel-build": "cd reddit_data_helper/reddit_search_frontend && npm ci && npm run build"
+  },
+  "dependencies": {
+    "form-data": "^4.0.0",
+    "snoowrap": "^1.23.0"
+  }
+}
+
+

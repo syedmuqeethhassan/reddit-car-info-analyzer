@@ -32,7 +32,7 @@ function App() {
       // 2. Save data to file
       // 3. Send file to Python
       // 4. Return summary to React
-      const response = await axios.post('http://localhost:3001/api/search', { keyword });
+      const response = await axios.post('/api/search', { keyword });
       
       console.log('Received response from backend:', response.data);
       
