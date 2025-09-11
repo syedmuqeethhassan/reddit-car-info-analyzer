@@ -10,7 +10,7 @@ def run_summarize(text_content: str) -> str:
     if not api_key:
         raise RuntimeError("Missing GOOGLE_API_KEY env var")
 
-    llm = GoogleGenerativeAI(model="gemini-2.0-flash-lite")
+    llm = GoogleGenerativeAI(model="gemini-2.0-flash-lite", google_api_key=api_key)
 
     prompt = (
         "You are an expert automotive research assistant. Read the provided Reddit-derived "
