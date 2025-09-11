@@ -3,8 +3,6 @@ import os
 from http.server import BaseHTTPRequestHandler
 
 from langchain_google_genai import GoogleGenerativeAI
-from langchain.chains.summarize import load_summarize_chain
-from langchain.schema import Document
 
 
 def run_summarize(text_content: str) -> str:
@@ -13,16 +11,24 @@ def run_summarize(text_content: str) -> str:
         raise RuntimeError("Missing GOOGLE_API_KEY env var")
 
     llm = GoogleGenerativeAI(model="gemini-2.0-flash-lite")
-    chain = load_summarize_chain(llm, chain_type="stuff")
-    doc = Document(page_content=text_content)
-    output = chain.invoke([doc], {
-        "prompt": (
-            "Summarize the following text content. Focus on key insights, pros/cons, "
-            "owner experiences, and common advice. Return a concise, structured summary."
-        )
-    })
-    summary = output.get("output_text", "")
-    if not summary.strip():
+
+    prompt = (
+        "You are an expert automotive research assistant. Read the provided Reddit-derived "
+        "content and produce a concise, structured summary with sections: Key Insights, "
+        "Pros, Cons, and Advice. Keep it under 250 words.\n\n"
+        f"Content to summarize:\n{text_content}"
+    )
+
+    result = llm.invoke(prompt)
+
+    # Handle both string and message/object outputs defensively
+    if isinstance(result, str):
+        summary = result
+    else:
+        summary = getattr(result, "content", "") or str(result)
+
+    summary = (summary or "").strip()
+    if not summary:
         summary = "Unable to generate a summary for the provided text content."
     return summary
 
