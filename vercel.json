@@ -3,10 +3,7 @@
   "functions": {
     "api/summarize.py": {
       "runtime": "python3.11",
-      "maxDuration": 30,
-      "includeFiles": [
-        "api/summarize.py"
-      ]
+      "maxDuration": 30
     },
     "api/search.js": {
       "runtime": "nodejs20.x",
